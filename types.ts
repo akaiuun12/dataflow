@@ -16,6 +16,9 @@ export interface Post {
   author: Author;
   coverImage: string;
   readingTime: string;
+  folder?: string;
+  fileName?: string;
+  category?: string;
 }
 
 export type ViewState = 'feed' | 'post' | 'editor';
