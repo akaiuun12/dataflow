@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
 import { Post, ViewState } from './types';
-import MarkdownRenderer from './MarkdownRenderer';
+import MarkdownRenderer from './components/MarkdownRenderer';
 
 const stripFrontmatter = (text: string) => {
   const regex = /^\uFEFF?(?:\s*\r?\n)*---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*(?:[\r\n]+|$)/;
@@ -126,13 +126,14 @@ const App: React.FC = () => {
     const loadPosts = async () => {
       try {
         // Dynamically discover all markdown files in posts directory using Vite's glob
-        const postModules = import.meta.glob('/posts/**/*.md', { as: 'raw', eager: false });
+        const postModules = import.meta.glob('/posts/**/*.md', { query: '?raw', import: 'default', eager: false });
         
         const loadedPosts: Post[] = [];
         const loadPromises = Object.entries(postModules).map(async ([path, moduleLoader]) => {
           try {
             // moduleLoader is a function that returns a promise when eager: false
-            const text = typeof moduleLoader === 'function' ? await moduleLoader() : moduleLoader;
+            const result = typeof moduleLoader === 'function' ? await moduleLoader() : moduleLoader;
+            const text = typeof result === 'string' ? result : String(result);
             const { metadata, body } = parseFrontmatter(text);
             if (metadata.published === false) return null;
             
