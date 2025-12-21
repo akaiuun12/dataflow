@@ -383,7 +383,7 @@ const App: React.FC = () => {
 
           {view === 'post' && currentPost && (
             <div className="animate-fade-in">
-              <div className="h-[42vh] sm:h-[50vh] relative overflow-hidden">
+              <div className="h-[30vh] sm:h-[35vh] relative overflow-hidden">
                 <img src={currentPost.coverImage} className="w-full h-full object-cover opacity-50 scale-105" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-slate-950 via-slate-950/40' : 'from-slate-50 via-slate-50/40'} to-transparent`} />
                 <div className={`absolute inset-0 flex items-end sm:items-center justify-center ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
