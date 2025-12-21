@@ -199,7 +199,7 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
                 <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-widest">{codeLang}</span>
                 <CopyButton code={code} />
               </div>
-              <pre className={`p-6 md:p-8 m-0 overflow-x-auto font-mono text-[13px] leading-relaxed language-${codeLang}`}>
+              <pre className={`p-10 md:p-12 m-0 overflow-x-auto font-mono text-[13px] leading-relaxed language-${codeLang}`}>
                 <code dangerouslySetInnerHTML={{ __html: highlighted }} />
               </pre>
             </div>

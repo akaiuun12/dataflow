@@ -349,7 +349,7 @@ const App: React.FC = () => {
                     <span className={`inline-block px-3 py-1 ${isDarkMode ? 'bg-red-600/20 border-red-500/30 text-red-100' : 'bg-red-600/10 border-red-500/20 text-red-700'} border rounded-full text-[9px] font-black uppercase tracking-[0.3em] mb-4`}>
                       {currentPost.category}
                     </span>
-                    <h1 className="text-2xl sm:text-4xl md:text-6xl font-black leading-tight tracking-tighter mb-5 drop-shadow-sm break-words">
+                    <h1 className="text-xl sm:text-3xl md:text-4xl font-black leading-tight tracking-tighter mb-5 drop-shadow-sm break-words">
                       {currentPost.title}
                     </h1>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -365,7 +365,7 @@ const App: React.FC = () => {
                 </div>
               </div>
               
-              <div className="max-w-6xl mx-auto px-6 md:px-10 pb-32 flex flex-col lg:flex-row gap-6">
+              <div className="max-w-6xl mx-auto px-6 md:px-10 pb-32 pt-12 md:pt-16 flex flex-col lg:flex-row gap-6">
                 <div className="flex-grow">
                   <div className={`${isDarkMode ? 'bg-slate-900/40' : 'bg-white'} backdrop-blur-md p-6 md:p-10 rounded-2xl border ${borderColor} shadow-2xl relative -mt-16 sm:-mt-24`}>
                     <MarkdownRenderer content={currentPost.content} />
