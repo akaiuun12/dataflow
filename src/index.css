@@ -2,16 +2,153 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   ============================================ */
 @layer base {
-  body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    transition: background-color 0.3s ease, color 0.3s ease;
+  :root {
+    /* Colors - Primary */
+    --color-primary: 220 38% 46%;
+    --color-primary-hover: 220 38% 56%;
+    --color-primary-light: 220 38% 96%;
+    --color-primary-dark: 220 38% 20%;
+    
+    /* Colors - Neutral */
+    --color-neutral-50: 210 40% 98%;
+    --color-neutral-100: 210 40% 96%;
+    --color-neutral-200: 214 32% 91%;
+    --color-neutral-500: 215 16% 47%;
+    --color-neutral-600: 215 19% 35%;
+    --color-neutral-800: 217 33% 17%;
+    --color-neutral-900: 222 47% 11%;
+    --color-neutral-950: 222 84% 5%;
+    
+    /* Colors - Syntax Highlighting */
+    --color-syntax-comment: 210 9% 45%;
+    --color-syntax-punctuation: 210 17% 82%;
+    --color-syntax-property: 199 89% 48%;
+    --color-syntax-string: 199 89% 65%;
+    --color-syntax-operator: 0 100% 67%;
+    --color-syntax-keyword: 0 100% 67%;
+    --color-syntax-function: 271 81% 56%;
+    --color-syntax-variable: 24 95% 53%;
+    
+    /* Spacing */
+    --spacing-scrollbar: 8px;
+    --spacing-scrollbar-radius: 10px;
+    
+    /* Typography */
+    --font-family-sans: 'Inter', sans-serif;
+    --font-family-mono: 'JetBrains Mono', monospace;
+    
+    /* Transitions */
+    --transition-theme: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: all 0.3s ease;
+    --transition-fast: all 0.2s ease;
+    
+    /* Shadows */
+    --shadow-scrollbar-thumb: rgba(150, 150, 150, 0.1);
+    --shadow-scrollbar-thumb-hover: rgba(150, 150, 150, 0.3);
+    
+    /* Code Block */
+    --code-bg: 220 13% 9%;
+    --code-border: 0 0% 100% / 0.1;
+    --code-inline-bg: 0 84% 60% / 0.1;
+    --code-inline-border: 0 84% 60% / 0.15;
+    --code-inline-color: 0 84% 60%;
+  }
+  
+  .dark {
+    --color-neutral-50: 210 40% 5%;
+    --color-neutral-100: 210 40% 10%;
+    --color-neutral-200: 217 33% 17%;
+    --color-neutral-500: 215 16% 47%;
+    --color-neutral-600: 215 19% 65%;
+    --color-neutral-800: 214 32% 91%;
+    --color-neutral-900: 210 40% 96%;
+    --color-neutral-950: 210 40% 98%;
   }
 }
 
+/* ============================================
+   Base Styles
+   ============================================ */
+@layer base {
+  body {
+    font-family: var(--font-family-sans);
+    margin: 0;
+    transition: var(--transition-base);
+    transition-property: background-color, color;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* ============================================
+   Component Styles
+   ============================================ */
 @layer components {
-  /* Custom Prism Syntax Highlighting Fixes */
+  /* Scrollbar Styles */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--shadow-scrollbar-thumb)) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: var(--spacing-scrollbar);
+    height: var(--spacing-scrollbar);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--shadow-scrollbar-thumb));
+    border-radius: var(--spacing-scrollbar-radius);
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: var(--transition-fast);
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--shadow-scrollbar-thumb-hover));
+  }
+  
+  /* Theme Transition */
+  .theme-transition {
+    transition: var(--transition-theme);
+  }
+  
+  /* Inline Code */
+  .inline-code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    background: hsl(var(--code-inline-bg));
+    color: hsl(var(--code-inline-color));
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.3rem;
+    border: 1px solid hsl(var(--code-inline-border));
+  }
+  
+  /* Markdown Content */
+  .markdown-content {
+    @apply max-w-none;
+  }
+  
+  .markdown-content p {
+    margin-bottom: 1.5rem;
+    line-height: 1.75;
+  }
+  
+  /* KaTeX Math Rendering */
+  .katex {
+    font-size: 1.1em;
+  }
+  
+  /* Prism.js Syntax Highlighting */
   pre[class*="language-"] {
     background: transparent !important;
     padding: 0 !important;
@@ -21,88 +158,81 @@
   code[class*="language-"] {
     background: transparent !important;
     text-shadow: none !important;
-    font-family: 'JetBrains Mono', monospace !important;
+    font-family: var(--font-family-mono) !important;
   }
   
-  .token.comment, .token.prolog, .token.doctype, .token.cdata { 
-    color: #6a737d !important; 
+  /* Syntax Highlighting Token Colors */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: hsl(var(--color-syntax-comment)) !important;
   }
   
-  .token.punctuation { 
-    color: #d1d5da !important; 
+  .token.punctuation {
+    color: hsl(var(--color-syntax-punctuation)) !important;
   }
   
-  .token.namespace { 
-    opacity: .7; 
+  .token.namespace {
+    opacity: 0.7;
   }
   
-  .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { 
-    color: #79c0ff !important; 
+  .token.property,
+  .token.tag,
+  .token.boolean,
+  .token.number,
+  .token.constant,
+  .token.symbol,
+  .token.deleted {
+    color: hsl(var(--color-syntax-property)) !important;
   }
   
-  .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { 
-    color: #a5d6ff !important; 
+  .token.selector,
+  .token.attr-name,
+  .token.string,
+  .token.char,
+  .token.builtin,
+  .token.inserted {
+    color: hsl(var(--color-syntax-string)) !important;
   }
   
-  .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string { 
-    color: #ff7b72 !important; 
+  .token.operator,
+  .token.entity,
+  .token.url,
+  .language-css .token.string,
+  .style .token.string {
+    color: hsl(var(--color-syntax-operator)) !important;
   }
   
-  .token.atrule, .token.attr-value, .token.keyword { 
-    color: #ff7b72 !important; 
+  .token.atrule,
+  .token.attr-value,
+  .token.keyword {
+    color: hsl(var(--color-syntax-keyword)) !important;
   }
   
-  .token.function, .token.class-name { 
-    color: #d2a8ff !important; 
+  .token.function,
+  .token.class-name {
+    color: hsl(var(--color-syntax-function)) !important;
   }
   
-  .token.regex, .token.important, .token.variable { 
-    color: #ffa657 !important; 
-  }
-
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(150, 150, 150, 0.1);
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(150, 150, 150, 0.3);
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-  
-  .katex { 
-    font-size: 1.1em; 
-  }
-  
-  .inline-code {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85em;
-    background: rgba(220, 38, 38, 0.1);
-    color: #ef4444;
-    padding: 0.15rem 0.35rem;
-    border-radius: 0.3rem;
-    border: 1px solid rgba(220, 38, 38, 0.15);
-  }
-  
-  .theme-transition {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .markdown-content p {
-    margin-bottom: 1.5rem;
-    line-height: 1.75;
+  .token.regex,
+  .token.important,
+  .token.variable {
+    color: hsl(var(--color-syntax-variable)) !important;
   }
 }
 
+/* ============================================
+   Utility Classes
+   ============================================ */
+@layer utilities {
+  /* No scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
