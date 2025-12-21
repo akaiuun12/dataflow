@@ -1,12 +1,12 @@
 
 import React, { useState, memo } from 'react';
 import Prism from 'prismjs';
-// Prism language components
-import 'https://esm.sh/prismjs@1.29.0/components/prism-python?no-check';
-import 'https://esm.sh/prismjs@1.29.0/components/prism-typescript?no-check';
-import 'https://esm.sh/prismjs@1.29.0/components/prism-javascript?no-check';
-import 'https://esm.sh/prismjs@1.29.0/components/prism-sql?no-check';
-import 'https://esm.sh/prismjs@1.29.0/components/prism-bash?no-check';
+// Prism language components - must be imported after Prism
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-bash';
 import katex from 'katex';
 
 interface MarkdownRendererProps {

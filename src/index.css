@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+@layer components {
+  /* Custom Prism Syntax Highlighting Fixes */
+  pre[class*="language-"] {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  code[class*="language-"] {
+    background: transparent !important;
+    text-shadow: none !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+  
+  .token.comment, .token.prolog, .token.doctype, .token.cdata { 
+    color: #6a737d !important; 
+  }
+  
+  .token.punctuation { 
+    color: #d1d5da !important; 
+  }
+  
+  .token.namespace { 
+    opacity: .7; 
+  }
+  
+  .token.property, .token.tag, .token.boolean, .token.number, .token.constant, .token.symbol, .token.deleted { 
+    color: #79c0ff !important; 
+  }
+  
+  .token.selector, .token.attr-name, .token.string, .token.char, .token.builtin, .token.inserted { 
+    color: #a5d6ff !important; 
+  }
+  
+  .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string { 
+    color: #ff7b72 !important; 
+  }
+  
+  .token.atrule, .token.attr-value, .token.keyword { 
+    color: #ff7b72 !important; 
+  }
+  
+  .token.function, .token.class-name { 
+    color: #d2a8ff !important; 
+  }
+  
+  .token.regex, .token.important, .token.variable { 
+    color: #ffa657 !important; 
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(150, 150, 150, 0.1);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(150, 150, 150, 0.3);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  
+  .katex { 
+    font-size: 1.1em; 
+  }
+  
+  .inline-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: rgba(220, 38, 38, 0.1);
+    color: #ef4444;
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.3rem;
+    border: 1px solid rgba(220, 38, 38, 0.15);
+  }
+  
+  .theme-transition {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .markdown-content p {
+    margin-bottom: 1.5rem;
+    line-height: 1.75;
+  }
+}
+
