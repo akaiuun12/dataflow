@@ -78,35 +78,35 @@ const App: React.FC = () => {
   const progressBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const loadPostsManifest = async () => {
+    const loadPosts = async () => {
       try {
-        const manifestResponse = await fetch('/posts.json');
-        if (!manifestResponse.ok) throw new Error('Failed to load posts manifest');
-        const postPaths: string[] = await manifestResponse.json();
+        // Dynamically discover all markdown files in posts directory using Vite's glob
+        const postModules = import.meta.glob('/posts/**/*.md', { as: 'raw', eager: false });
         
         const loadedPosts: Post[] = [];
-        for (const path of postPaths) {
+        const loadPromises = Object.entries(postModules).map(async ([path, moduleLoader]) => {
           try {
-            const response = await fetch(`/${path}`);
-            if (!response.ok) continue;
-            const text = await response.text();
+            // moduleLoader is a function that returns a promise when eager: false
+            const text = typeof moduleLoader === 'function' ? await moduleLoader() : moduleLoader;
             const { metadata, body } = parseFrontmatter(text);
-            if (metadata.published === false) continue;
+            if (metadata.published === false) return null;
             
             const h1Match = body.match(/^#\s+(.*)/m);
             const postTitle = metadata.title || (h1Match ? h1Match[1] : null) || 'Untitled Post';
             const fileName = path.split('/').pop() || 'file.md';
             
-            // Extract category from path: posts/category/file.md -> category
-            const pathParts = path.split('/');
+            // Extract category from folder path: posts/category/file.md -> category
+            // Path format from glob: /posts/category/file.md
+            const pathParts = path.replace(/^\//, '').split('/');
             let derivedCategory = 'GENERAL';
-            if (pathParts.length > 2) {
+            if (pathParts.length > 2 && pathParts[0] === 'posts') {
+              // Get the folder name (category) from posts/category/file.md
               derivedCategory = pathParts[1].toUpperCase();
             }
 
             const finalTags = Array.isArray(metadata.tags) ? metadata.tags.map(String) : (metadata.tags ? [String(metadata.tags)] : []);
 
-            loadedPosts.push({
+            return {
               id: Math.random().toString(36).substr(2, 9),
               title: postTitle,
               slug: (metadata.title || fileName).toLowerCase().replace(/\s+/g, '-'),
@@ -123,18 +123,22 @@ const App: React.FC = () => {
               readingTime: `${Math.ceil(body.split(/\s+/).length / 200)} min read`,
               category: metadata.category?.toUpperCase() || derivedCategory,
               fileName: fileName
-            });
+            } as Post;
           } catch (e) {
             console.warn(`Could not load ${path}`, e);
+            return null;
           }
-        }
-        loadedPosts.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-        setPosts(loadedPosts);
+        });
+
+        const results = await Promise.all(loadPromises);
+        const validPosts = results.filter((p): p is Post => p !== null);
+        validPosts.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+        setPosts(validPosts);
       } catch (err) {
-        console.error('Error fetching manifest:', err);
+        console.error('Error loading posts:', err);
       }
     };
-    loadPostsManifest();
+    loadPosts();
   }, []);
 
   useEffect(() => {
