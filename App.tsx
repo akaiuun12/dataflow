@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
 import { Post, ViewState } from './types';
-import Editor from './Editor';
 import MarkdownRenderer from './MarkdownRenderer';
 
 const parseFrontmatter = (content: string) => {
@@ -12,25 +11,66 @@ const parseFrontmatter = (content: string) => {
     const yaml = match[1];
     const body = content.slice(match[0].length).trim();
     const metadata: any = {};
+    const lines = yaml.split(/\r?\n/);
     
-    yaml.split(/\r?\n/).forEach(line => {
+    let i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
       const firstColon = line.indexOf(':');
+      
       if (firstColon !== -1) {
         const key = line.slice(0, firstColon).trim();
         let value = line.slice(firstColon + 1).trim();
+        
+        // Handle multi-line values (indented lines following the key)
+        if (value === '') {
+          const multiLineValue: string[] = [];
+          i++;
+          // Collect all following indented lines until we hit a new key or empty line
+          while (i < lines.length) {
+            const nextLine = lines[i];
+            // Stop if we hit an empty line or a new key (colon without leading whitespace)
+            if (nextLine.trim() === '') {
+              break;
+            }
+            // Check if this is a new key (has colon and starts at beginning of line or has minimal indent)
+            const nextColon = nextLine.indexOf(':');
+            if (nextColon !== -1 && !nextLine.match(/^\s{4,}/)) {
+              // This might be a new key, but check if it's actually indented (part of value)
+              const indent = nextLine.match(/^(\s*)/)?.[1]?.length || 0;
+              if (indent === 0 || indent < 2) {
+                // New key, stop collecting
+                break;
+              }
+            }
+            // Collect this line (remove leading whitespace)
+            if (nextLine.match(/^\s+/)) {
+              multiLineValue.push(nextLine.replace(/^\s+/, ''));
+            } else if (nextLine.trim() !== '') {
+              multiLineValue.push(nextLine);
+            }
+            i++;
+          }
+          if (multiLineValue.length > 0) {
+            value = multiLineValue.join(' ').trim();
+          }
+          i--; // Adjust for the outer loop increment
+        }
+        
         value = value.replace(/^['"](.*)['"]$/, '$1');
         
         if (value.startsWith('[') && value.endsWith(']')) {
           metadata[key] = value.slice(1, -1).split(',').map(s => s.trim().replace(/^['"](.*)['"]$/, '$1'));
-        } else if (value === 'true') {
+        } else if (value === 'true' || value === 'True') {
           metadata[key] = true;
-        } else if (value === 'false') {
+        } else if (value === 'false' || value === 'False') {
           metadata[key] = false;
         } else {
           metadata[key] = value;
         }
       }
-    });
+      i++;
+    }
     return { metadata, body };
   }
   return { metadata: {}, body: content.trim() };
@@ -73,7 +113,6 @@ const App: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
   
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
 
@@ -111,7 +150,7 @@ const App: React.FC = () => {
               title: postTitle,
               slug: (metadata.title || fileName).toLowerCase().replace(/\s+/g, '-'),
               excerpt: metadata.description || body.slice(0, 150).replace(/[#*`]/g, '').trim() + '...',
-              content: text,
+              content: text, // Keep full text with frontmatter for MarkdownRenderer (it strips frontmatter itself)
               publishedAt: String(metadata.date || '2024-01-01'),
               tags: finalTags,
               author: {
@@ -180,65 +219,11 @@ const App: React.FC = () => {
     mainContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const text = ev.target?.result as string;
-        const { metadata, body } = parseFrontmatter(text);
-        const h1 = body.match(/^#\s+(.*)/m);
-        const newPost: Post = {
-          id: Math.random().toString(36).substr(2, 9),
-          title: metadata.title || (h1 ? h1[1] : 'Untitled'),
-          slug: file.name,
-          excerpt: body.slice(0, 150) + '...',
-          content: text,
-          publishedAt: metadata.date || new Date().toISOString().split('T')[0],
-          tags: metadata.tags || [],
-          author: { name: 'User', avatar: 'https://ui-avatars.com/api/?name=User', role: 'Contributor' },
-          coverImage: metadata.image || 'https://images.unsplash.com/photo-1498050108023-c5249f4df085',
-          readingTime: '5 min read',
-          category: metadata.category?.toUpperCase() || 'UPLOADED',
-          fileName: file.name
-        };
-        setPosts(prev => [newPost, ...prev]);
-        setCurrentPost(newPost);
-        setView('post');
-        scrollToTop();
-      };
-      reader.readAsText(file);
-    });
-  };
-
-  const handleSavePost = (data: Partial<Post>) => {
-    const p: Post = {
-      id: currentPost?.id || Math.random().toString(36).substr(2, 9),
-      title: data.title || 'Untitled',
-      slug: data.title?.toLowerCase().replace(/\s+/g, '-') || 'post',
-      excerpt: data.content?.slice(0, 150) + '...',
-      content: data.content || '',
-      publishedAt: data.publishedAt || new Date().toISOString().split('T')[0],
-      tags: data.tags || [],
-      author: currentPost?.author || { name: 'DevFlow User', avatar: 'https://ui-avatars.com/api/?name=User', role: 'Engineer' },
-      coverImage: data.coverImage || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa',
-      readingTime: data.readingTime || '1 min read',
-      category: 'STUDIO',
-      fileName: 'studio.md'
-    };
-    if (currentPost) setPosts(posts.map(x => x.id === p.id ? p : x));
-    else setPosts([p, ...posts]);
-    setCurrentPost(p);
-    setView('post');
-    scrollToTop();
-  };
 
   const borderColor = isDarkMode ? 'border-slate-800' : 'border-slate-200';
 
   return (
     <div className={`flex h-screen overflow-hidden theme-transition ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
-      <input type="file" accept=".md" multiple className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-
       <main className="flex-grow flex flex-col h-screen overflow-hidden relative">
         <div className="absolute top-0 left-0 w-full h-[3px] bg-red-600/10 z-50">
           <div ref={progressBarRef} className="h-full bg-red-600 transition-all duration-75" style={{ width: '0%' }} />
@@ -277,14 +262,6 @@ const App: React.FC = () => {
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Explore knowledge..." className={`${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'} border ${borderColor} rounded-2xl pl-10 pr-4 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500/50 w-48 xl:w-64 transition-all`} />
               <svg className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
-            
-            <button onClick={() => fileInputRef.current?.click()} className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-red-500 transition-all" title="Import Markdown">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-            </button>
-
-            <button onClick={() => {setView('editor'); setCurrentPost(null);}} className="bg-red-600 text-white p-2.5 rounded-xl hover:bg-red-500 transition-all shadow-lg shadow-red-900/10" title="New Draft">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
-            </button>
 
             <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2.5 rounded-xl border ${borderColor} ${isDarkMode ? 'bg-slate-800 text-yellow-400' : 'bg-slate-100 text-slate-800'} transition-all`}>
               {isDarkMode ? <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" /></svg> : <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>}
@@ -297,7 +274,7 @@ const App: React.FC = () => {
             <div className="max-w-6xl mx-auto px-10 py-20">
               <div className="mb-20 animate-fade-in text-center">
                 <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-none">
-                  Technical <span className="text-red-600">Journal.</span>
+                  Databook <span className="text-red-600">Red.</span>
                 </h1>
                 <p className="text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed">System logs, architectural pattern research, and modern engineering paradigms curated for the elite developer.</p>
               </div>
@@ -405,7 +382,6 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {view === 'editor' && <Editor initialPost={currentPost || undefined} onCancel={() => setView('feed')} onSave={handleSavePost} />}
         </div>
       </main>
 

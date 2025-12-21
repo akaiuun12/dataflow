@@ -250,7 +250,8 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
       
       if (line.startsWith('# ')) {
         const titleText = line.slice(2);
-        elements.push(<h1 id={slugify(titleText)} key={key} className="text-4xl font-black mt-20 mb-10 tracking-tighter leading-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h1>);
+        const isFirstElement = elements.length === 0;
+        elements.push(<h1 id={slugify(titleText)} key={key} className={`text-4xl font-black ${isFirstElement ? 'mt-4' : 'mt-20'} mb-10 tracking-tighter leading-tight text-current scroll-mt-24`}>{renderLineContent(titleText)}</h1>);
       } else if (line.startsWith('## ')) {
         const titleText = line.slice(3);
         elements.push(<h2 id={slugify(titleText)} key={key} className="text-2xl font-bold mt-16 mb-8 border-b border-red-500/10 pb-4 tracking-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h2>);
