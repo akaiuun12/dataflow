@@ -79,7 +79,7 @@ const Editor: React.FC<EditorProps> = ({ onSave, onCancel, initialPost }) => {
         }
       });
 
-      for (const part of response.candidates[0].content.parts) {
+      for (const part of response.candidates?.[0]?.content?.parts || []) {
         if (part.inlineData) {
           setCoverImage(`data:image/png;base64,${part.inlineData.data}`);
           break;
