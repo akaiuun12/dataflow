@@ -64,7 +64,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         const boldParts = cp.split(/(\*\*[^*]+\*\*)/g);
         return boldParts.flatMap((bp, k) => {
           if (bp.startsWith('**') && bp.endsWith('**') && bp.length > 4) {
-            return <strong key={`bold-${i}-${j}-${k}`} className="text-red-500 font-bold">{bp.slice(2, -2)}</strong>;
+            return <strong key={`bold-${i}-${j}-${k}`} className="text-red-600 font-bold">{bp.slice(2, -2)}</strong>;
           }
 
           // 4. Split by Italic: *italic*
@@ -91,12 +91,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     );
 
     return (
-      <div key={key} className="my-8 overflow-x-auto rounded-2xl border border-white/5 bg-slate-900/10">
+      <div key={key} className="my-8 overflow-x-auto rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-900/5 dark:bg-slate-900/10">
         <table className="w-full text-left border-collapse text-sm">
           <thead className="bg-red-500/5 text-red-500 font-black uppercase tracking-widest text-[11px]">
             <tr>
               {headerRow.map((h, i) => (
-                <th key={i} className="px-6 py-4 border-b border-white/5">{renderLineContent(h)}</th>
+                <th key={i} className="px-6 py-4 border-b border-slate-200 dark:border-white/5">{renderLineContent(h)}</th>
               ))}
             </tr>
           </thead>
@@ -104,7 +104,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
             {dataRows.map((row, i) => (
               <tr key={i} className="even:bg-white/5 transition-colors hover:bg-red-500/5">
                 {row.map((cell, j) => (
-                  <td key={j} className="px-6 py-4 border-b border-white/5">{renderLineContent(cell)}</td>
+                  <td key={j} className="px-6 py-4 border-b border-slate-200 dark:border-white/5">{renderLineContent(cell)}</td>
                 ))}
               </tr>
             ))}
@@ -112,6 +112,15 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         </table>
       </div>
     );
+  };
+
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   };
 
   const parseMarkdown = (text: string) => {
@@ -183,7 +192,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                 </div>
                 <CopyButton code={code} />
               </div>
-              <pre className={`p-12 overflow-x-auto font-mono text-[13px] leading-relaxed language-${codeLang}`}>
+              {/* Added consistent inner margin/padding to pre block */}
+              <pre className={`p-8 md:p-12 m-4 rounded-xl bg-black/20 overflow-x-auto font-mono text-[13px] leading-relaxed language-${codeLang}`}>
                 <code dangerouslySetInnerHTML={{ __html: highlighted }} />
               </pre>
             </div>
@@ -203,7 +213,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
         if (trimmedLine.endsWith('$$') && trimmedLine.length > 4) {
           const math = trimmedLine.slice(2, -2);
           const html = katex.renderToString(math, { throwOnError: false, displayMode: true });
-          elements.push(<div key={`math-block-${index}`} className="my-4 py-3 overflow-x-auto text-current bg-slate-900/10 rounded-3xl" dangerouslySetInnerHTML={{ __html: html }} />);
+          elements.push(<div key={`math-block-${index}`} className="my-4 py-3 overflow-x-auto text-current bg-slate-900/5 dark:bg-slate-900/10 rounded-3xl" dangerouslySetInnerHTML={{ __html: html }} />);
           return;
         }
 
@@ -213,7 +223,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           inMathBlock = false;
           const math = mathContent.join('\n');
           const html = katex.renderToString(math, { throwOnError: false, displayMode: true });
-          elements.push(<div key={`math-block-multi-${index}`} className="my-4 py-3 overflow-x-auto text-current bg-slate-900/10 rounded-3xl" dangerouslySetInnerHTML={{ __html: html }} />);
+          elements.push(<div key={`math-block-multi-${index}`} className="my-4 py-3 overflow-x-auto text-current bg-slate-900/5 dark:bg-slate-900/10 rounded-3xl" dangerouslySetInnerHTML={{ __html: html }} />);
           mathContent = [];
         }
         return;
@@ -228,17 +238,20 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
       
       // Traditional Markdown Blocks
       if (line.startsWith('# ')) {
-        elements.push(<h1 key={key} className="text-4xl font-black mt-20 mb-10 tracking-tighter leading-tight text-current">{renderLineContent(line.slice(2))}</h1>);
+        const titleText = line.slice(2);
+        elements.push(<h1 id={slugify(titleText)} key={key} className="text-4xl font-black mt-20 mb-10 tracking-tighter leading-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h1>);
       } else if (line.startsWith('## ')) {
-        elements.push(<h2 key={key} className="text-2xl font-bold mt-16 mb-8 border-b border-red-500/10 pb-4 tracking-tight text-current">{renderLineContent(line.slice(3))}</h2>);
+        const titleText = line.slice(3);
+        elements.push(<h2 id={slugify(titleText)} key={key} className="text-2xl font-bold mt-16 mb-8 border-b border-red-500/10 pb-4 tracking-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h2>);
       } else if (line.startsWith('### ')) {
-        elements.push(<h3 key={key} className="text-xl font-semibold mt-12 mb-6 text-current">{renderLineContent(line.slice(4))}</h3>);
+        const titleText = line.slice(4);
+        elements.push(<h3 id={slugify(titleText)} key={key} className="text-xl font-semibold mt-12 mb-6 text-current scroll-mt-24">{renderLineContent(titleText)}</h3>);
       } else if (line.startsWith('- ') || line.startsWith('* ')) {
         elements.push(<li key={key} className="ml-8 mb-4 list-disc pl-3 leading-relaxed opacity-90">{renderLineContent(line.slice(2))}</li>);
       } else if (line.match(/^\d+\. /)) {
         elements.push(<li key={key} className="ml-8 mb-4 list-decimal pl-3 leading-relaxed opacity-90">{renderLineContent(line.replace(/^\d+\. /, ''))}</li>);
       } else if (line.startsWith('> ')) {
-        elements.push(<blockquote key={key} className="border-l-4 border-red-600 bg-red-600/5 px-8 py-6 my-10 italic rounded-r-3xl opacity-80 text-lg">{renderLineContent(line.slice(2))}</blockquote>);
+        elements.push(<blockquote key={key} className="border-l-4 border-red-600 bg-red-600/5 dark:bg-red-600/10 px-8 py-6 my-10 italic rounded-r-3xl opacity-80 text-lg">{renderLineContent(line.slice(2))}</blockquote>);
       } else if (trimmedLine === '') {
         elements.push(<div key={key} className="h-8" />);
       } else {
@@ -254,7 +267,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     return elements;
   };
 
-  return <div className="max-w-none prose prose-invert">{parseMarkdown(content)}</div>;
+  return <div className="max-w-none prose dark:prose-invert">{parseMarkdown(content)}</div>;
 };
 
 export default MarkdownRenderer;
