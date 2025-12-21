@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from 'react';
 import { Post, ViewState } from './types';
 import MarkdownRenderer from './components/MarkdownRenderer';
+import { extractToc } from './utils/toc';
 
 const stripFrontmatter = (text: string) => {
   const regex = /^\uFEFF?(?:\s*\r?\n)*---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*(?:[\r\n]+|$)/;
@@ -364,7 +365,7 @@ const App: React.FC = () => {
                 </div>
               </div>
               
-              <div className="max-w-6xl mx-auto px-6 md:px-10 pb-32 flex flex-col lg:flex-row gap-16">
+              <div className="max-w-6xl mx-auto px-6 md:px-10 pb-32 flex flex-col lg:flex-row gap-6">
                 <div className="flex-grow">
                   <div className={`${isDarkMode ? 'bg-slate-900/40' : 'bg-white'} backdrop-blur-md p-6 md:p-10 rounded-2xl border ${borderColor} shadow-2xl relative -mt-16 sm:-mt-24`}>
                     <MarkdownRenderer content={currentPost.content} />
@@ -374,27 +375,41 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 
-                <aside className="lg:w-80 h-fit lg:sticky lg:top-32 hidden lg:block -mt-10">
+                <aside className="lg:w-[28rem] h-fit lg:sticky lg:top-32 hidden lg:block -mt-16 sm:-mt-24">
                    <div className={`p-6 rounded-2xl border ${borderColor} ${isDarkMode ? 'bg-slate-900/40' : 'bg-white shadow-xl'}`}>
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8 border-b border-red-500/10 pb-4">Metadata</h4>
-                      <div className="space-y-6">
-                        <div>
-                          <p className="text-[9px] font-black uppercase text-slate-500 mb-2">Category</p>
-                          <p className="font-bold text-sm">{currentPost.category}</p>
-                        </div>
-                        <div>
-                          <p className="text-[9px] font-black uppercase text-slate-500 mb-2">Tags</p>
-                          <div className="flex flex-wrap gap-2">
-                            {currentPost.tags.map(t => (
-                              <span key={t} className="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[10px] font-bold">{t}</span>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-[9px] font-black uppercase text-slate-500 mb-2">Internal Index</p>
-                          <p className="font-mono text-[10px] text-slate-400 break-all">{currentPost.fileName || 'buffer.md'}</p>
-                        </div>
-                      </div>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8 border-b border-red-500/10 pb-4">Table of Contents</h4>
+                      <nav className="space-y-2">
+                        {(() => {
+                          const toc = extractToc(currentPost.content);
+                          if (toc.length === 0) {
+                            return (
+                              <p className="text-sm text-slate-500 italic">No headings found</p>
+                            );
+                          }
+                          return toc.map((item) => (
+                            <a
+                              key={item.id}
+                              href={`#${item.id}`}
+                              className={`block text-sm hover:text-red-600 transition-colors ${
+                                item.level === 1 
+                                  ? 'font-bold text-base' 
+                                  : item.level === 2 
+                                  ? 'font-semibold ml-0' 
+                                  : 'ml-4 text-slate-600 dark:text-slate-400'
+                              }`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const element = document.getElementById(item.id);
+                                if (element) {
+                                  element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                              }}
+                            >
+                              {item.text}
+                            </a>
+                          ));
+                        })()}
+                      </nav>
                    </div>
                 </aside>
               </div>
