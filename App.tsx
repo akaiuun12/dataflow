@@ -254,12 +254,6 @@ const App: React.FC = () => {
             </div>
 
             <nav className="flex items-center space-x-1 overflow-x-auto no-scrollbar py-2">
-              <button 
-                onClick={() => {setSelectedCategory(null); setView('feed'); setCurrentPost(null); scrollToTop();}}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!selectedCategory ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-red-500 hover:bg-red-500/5'}`}
-              >
-                All
-              </button>
               {categories.map(cat => (
                 <button 
                   key={cat}
@@ -345,16 +339,25 @@ const App: React.FC = () => {
 
           {view === 'post' && currentPost && (
             <div className="animate-fade-in">
-              <div className="h-[60vh] relative overflow-hidden">
+              <div className="h-[42vh] sm:h-[50vh] relative overflow-hidden">
                 <img src={currentPost.coverImage} className="w-full h-full object-cover opacity-50 scale-105" />
                 <div className={`absolute inset-0 bg-gradient-to-t ${isDarkMode ? 'from-slate-950 via-slate-950/40' : 'from-slate-50 via-slate-50/40'} to-transparent`} />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="max-w-4xl px-10 w-full text-center">
-                    <span className="inline-block px-6 py-2 bg-red-600/10 border border-red-500/20 text-red-600 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-8">{currentPost.category}</span>
-                    <h1 className="text-5xl md:text-8xl font-black leading-none tracking-tighter mb-12 drop-shadow-2xl">{currentPost.title}</h1>
-                    <div className="flex items-center justify-center space-x-6">
-                      <img src={currentPost.author.avatar} className="w-16 h-16 rounded-2xl border-2 border-red-600/30 shadow-2xl" />
-                      <div className="text-left"><p className="text-xl font-bold">{currentPost.author.name}</p><p className="text-[11px] text-red-600 uppercase font-black tracking-widest opacity-80">{currentPost.publishedAt} • {currentPost.readingTime}</p></div>
+                <div className={`absolute inset-0 flex items-end sm:items-center justify-center ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+                  <div className="max-w-4xl px-4 sm:px-8 w-full text-center pb-6 sm:pb-0">
+                    <span className={`inline-block px-3 py-1 ${isDarkMode ? 'bg-red-600/20 border-red-500/30 text-red-100' : 'bg-red-600/10 border-red-500/20 text-red-700'} border rounded-full text-[9px] font-black uppercase tracking-[0.3em] mb-4`}>
+                      {currentPost.category}
+                    </span>
+                    <h1 className="text-2xl sm:text-4xl md:text-6xl font-black leading-tight tracking-tighter mb-5 drop-shadow-sm break-words">
+                      {currentPost.title}
+                    </h1>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                      <img src={currentPost.author.avatar} className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl border-2 ${isDarkMode ? 'border-red-600/30' : 'border-red-600/20'} shadow-2xl`} />
+                      <div className="text-center sm:text-left">
+                        <p className="text-sm sm:text-base font-bold">{currentPost.author.name}</p>
+                        <p className={`text-[10px] ${isDarkMode ? 'text-red-100' : 'text-red-700'} uppercase font-black tracking-widest opacity-90`}>
+                          {currentPost.publishedAt} • {currentPost.readingTime}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -362,7 +365,7 @@ const App: React.FC = () => {
               
               <div className="max-w-6xl mx-auto px-6 md:px-10 pb-32 flex flex-col lg:flex-row gap-16">
                 <div className="flex-grow">
-                  <div className={`${isDarkMode ? 'bg-slate-900/40' : 'bg-white'} backdrop-blur-md p-10 md:p-24 rounded-[4rem] border ${borderColor} shadow-2xl relative -mt-32`}>
+                  <div className={`${isDarkMode ? 'bg-slate-900/40' : 'bg-white'} backdrop-blur-md p-6 md:p-10 rounded-2xl border ${borderColor} shadow-2xl relative -mt-16 sm:-mt-24`}>
                     <MarkdownRenderer content={currentPost.content} />
                   </div>
                   <div className="flex justify-center mt-20">
@@ -371,7 +374,7 @@ const App: React.FC = () => {
                 </div>
                 
                 <aside className="lg:w-80 h-fit lg:sticky lg:top-32 hidden lg:block -mt-10">
-                   <div className={`p-10 rounded-[3rem] border ${borderColor} ${isDarkMode ? 'bg-slate-900/40' : 'bg-white shadow-xl'}`}>
+                   <div className={`p-6 rounded-2xl border ${borderColor} ${isDarkMode ? 'bg-slate-900/40' : 'bg-white shadow-xl'}`}>
                       <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8 border-b border-red-500/10 pb-4">Metadata</h4>
                       <div className="space-y-6">
                         <div>

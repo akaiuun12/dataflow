@@ -25,13 +25,13 @@ const CopyButton: React.FC<{ code: string }> = ({ code }) => {
   return (
     <button 
       onClick={handleCopy}
-      className={`text-[10px] font-black uppercase tracking-widest transition-all duration-300 px-3 py-1 rounded-lg border ${
+      className={`text-[10px] font-bold uppercase tracking-widest transition-all duration-200 ${
         copied 
-        ? 'bg-green-500/10 text-green-500 border-green-500/20' 
-        : 'text-slate-500 hover:text-red-400 border-transparent hover:border-white/10'
+        ? 'text-green-400' 
+        : 'text-slate-500 hover:text-slate-300'
       }`}
     >
-      {copied ? 'Copied!' : 'Copy'}
+      {copied ? 'Copied' : 'Copy'}
     </button>
   );
 };
@@ -194,19 +194,12 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
           const highlighted = Prism.highlight(code, grammar, codeLang);
           
           elements.push(
-            <div key={`code-block-${index}`} className="my-10 rounded-2xl overflow-hidden bg-[#0d1117] border border-white/5 shadow-[0_10px_40px_rgba(0,0,0,0.15)] theme-transition">
-              <div className="flex items-center justify-between px-6 py-3.5 bg-white/5 border-b border-white/5">
-                <div className="flex items-center space-x-2">
-                   <div className="flex space-x-2 mr-4">
-                    <div className="w-3 h-3 rounded-full bg-red-500/40"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-700"></div>
-                    <div className="w-3 h-3 rounded-full bg-slate-800"></div>
-                  </div>
-                  <span className="text-[10px] font-black font-mono text-slate-500 uppercase tracking-widest">{codeLang}</span>
-                </div>
+            <div key={`code-block-${index}`} className="my-8 rounded-xl overflow-hidden bg-[#0d1117] border border-white/10 shadow-xl theme-transition group">
+              <div className="flex items-center justify-between px-5 py-2.5 bg-white/[0.03] border-b border-white/5">
+                <span className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-widest">{codeLang}</span>
                 <CopyButton code={code} />
               </div>
-              <pre className={`p-8 md:p-12 m-4 rounded-xl bg-black/20 overflow-x-auto font-mono text-[13px] leading-relaxed language-${codeLang}`}>
+              <pre className={`p-6 md:p-8 m-0 overflow-x-auto font-mono text-[13px] leading-relaxed language-${codeLang}`}>
                 <code dangerouslySetInnerHTML={{ __html: highlighted }} />
               </pre>
             </div>
@@ -251,23 +244,23 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
       if (line.startsWith('# ')) {
         const titleText = line.slice(2);
         const isFirstElement = elements.length === 0;
-        elements.push(<h1 id={slugify(titleText)} key={key} className={`text-4xl font-black ${isFirstElement ? 'mt-4' : 'mt-20'} mb-10 tracking-tighter leading-tight text-current scroll-mt-24`}>{renderLineContent(titleText)}</h1>);
+        elements.push(<h1 id={slugify(titleText)} key={key} className={`text-3xl font-black ${isFirstElement ? 'mt-4' : 'mt-8'} mb-2 tracking-tighter leading-tight text-current scroll-mt-24`}>{renderLineContent(titleText)}</h1>);
       } else if (line.startsWith('## ')) {
         const titleText = line.slice(3);
-        elements.push(<h2 id={slugify(titleText)} key={key} className="text-2xl font-bold mt-16 mb-8 border-b border-red-500/10 pb-4 tracking-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h2>);
+        elements.push(<h2 id={slugify(titleText)} key={key} className="text-xl font-bold mt-6 mb-2 border-b border-red-500/10 pb-1 tracking-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h2>);
       } else if (line.startsWith('### ')) {
         const titleText = line.slice(4);
-        elements.push(<h3 id={slugify(titleText)} key={key} className="text-xl font-semibold mt-12 mb-6 text-current scroll-mt-24">{renderLineContent(titleText)}</h3>);
+        elements.push(<h3 id={slugify(titleText)} key={key} className="text-lg font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h3>);
       } else if (line.startsWith('- ') || line.startsWith('* ')) {
-        elements.push(<li key={key} className="ml-8 mb-4 list-disc pl-3 leading-relaxed opacity-90">{renderLineContent(line.slice(2))}</li>);
+        elements.push(<li key={key} className="ml-8 mb-1 list-disc pl-3 leading-relaxed opacity-90 text-[15px]">{renderLineContent(line.slice(2))}</li>);
       } else if (line.match(/^\d+\. /)) {
-        elements.push(<li key={key} className="ml-8 mb-4 list-decimal pl-3 leading-relaxed opacity-90">{renderLineContent(line.replace(/^\d+\. /, ''))}</li>);
+        elements.push(<li key={key} className="ml-8 mb-1 list-decimal pl-3 leading-relaxed opacity-90 text-[15px]">{renderLineContent(line.replace(/^\d+\. /, ''))}</li>);
       } else if (line.startsWith('> ')) {
-        elements.push(<blockquote key={key} className="border-l-4 border-red-600 bg-red-600/5 dark:bg-red-600/10 px-8 py-6 my-10 italic rounded-r-3xl opacity-80 text-lg">{renderLineContent(line.slice(2))}</blockquote>);
+        elements.push(<blockquote key={key} className="border-l-4 border-red-600 bg-red-600/5 dark:bg-red-600/10 px-6 py-3 my-4 italic rounded-r-3xl opacity-80 text-base">{renderLineContent(line.slice(2))}</blockquote>);
       } else if (trimmedLine === '') {
-        elements.push(<div key={key} className="h-8" />);
+        elements.push(<div key={key} className="h-1" />);
       } else {
-        elements.push(<p key={key} className="mb-6 leading-relaxed text-[17px] font-medium opacity-90">{renderLineContent(line)}</p>);
+        elements.push(<p key={key} className="mb-1 leading-relaxed text-[15px] font-medium opacity-90">{renderLineContent(line)}</p>);
       }
     });
 
