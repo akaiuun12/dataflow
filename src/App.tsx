@@ -221,12 +221,38 @@ const App: React.FC = () => {
     return Array.from(cats).sort();
   }, [posts]);
 
+  // Multi-language search function that handles English and Korean
+  const normalizeText = (text: string): string => {
+    return text.toLowerCase().trim();
+  };
+
+  const matchesSearch = (post: Post, searchTerm: string): boolean => {
+    if (!searchTerm) return true;
+    
+    const normalizedSearch = normalizeText(searchTerm);
+    
+    // Search in title
+    if (normalizeText(post.title).includes(normalizedSearch)) return true;
+    
+    // Search in tags
+    if (post.tags.some(tag => normalizeText(tag).includes(normalizedSearch))) return true;
+    
+    // Search in excerpt/content (multi-language support)
+    const excerptText = normalizeText(post.excerpt);
+    if (excerptText.includes(normalizedSearch)) return true;
+    
+    // Search in content body (first 500 chars for performance)
+    const contentPreview = normalizeText(post.content.slice(0, 500));
+    if (contentPreview.includes(normalizedSearch)) return true;
+    
+    return false;
+  };
+
   const filteredPosts = useMemo(() => 
     posts.filter(p => {
-      const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || 
-                           p.tags.some(t => t.toLowerCase().includes(search.toLowerCase()));
+      const matchesSearchTerm = matchesSearch(p, search);
       const matchesCategory = selectedCategory ? p.category === selectedCategory : true;
-      return matchesSearch && matchesCategory;
+      return matchesSearchTerm && matchesCategory;
     }), [posts, search, selectedCategory]
   );
 
@@ -270,11 +296,19 @@ const App: React.FC = () => {
 
           <div className="flex items-center space-x-4">
             <div className="relative group hidden lg:block">
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Explore knowledge..." className={`${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'} border ${borderColor} rounded-2xl pl-10 pr-4 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500/50 w-48 xl:w-64 transition-all`} />
-              <svg className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <input 
+                value={search} 
+                onChange={(e) => setSearch(e.target.value)} 
+                placeholder="Explore knowledge..." 
+                className={`${isDarkMode ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-100 hover:bg-slate-200'} border ${borderColor} rounded-2xl pl-10 pr-4 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-red-500/50 w-48 xl:w-64 transition-all duration-200 hover:border-red-500/30 hover:shadow-lg`} 
+              />
+              <svg className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-500 group-hover:text-red-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </div>
 
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className={`p-2.5 rounded-xl border ${borderColor} ${isDarkMode ? 'bg-slate-800 text-yellow-400' : 'bg-slate-100 text-slate-800'} transition-all`}>
+            <button 
+              onClick={() => setIsDarkMode(!isDarkMode)} 
+              className={`p-2.5 rounded-xl border ${borderColor} ${isDarkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700 hover:text-yellow-300' : 'bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-900'} transition-all duration-200 hover:border-red-500/30 hover:shadow-lg hover:scale-105 active:scale-95`}
+            >
               {isDarkMode ? <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" /></svg> : <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>}
             </button>
           </div>

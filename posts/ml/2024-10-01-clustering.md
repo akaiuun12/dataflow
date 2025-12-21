@@ -11,9 +11,9 @@ description:
 
 show_thumbnail: true
 image: 
-    # /imgs/a8ea5691-class-imbalance-diagram-05.png
+    # /imgs/2024-09-30-class-imbalance-diagram-05.png
 optimized_image: 
-    # /imgs/a8ea5691-class-imbalance-diagram-05.png
+    # /imgs/2024-09-30-class-imbalance-diagram-05.png
                     
 math: true
 published: true
@@ -31,7 +31,7 @@ sns.scatterplot(x=X[:,0], y=X[:,1], hue=y)
 plt.show()
 ```
 
-![picture 0](/imgs/a3dd6457-clustering-diagram-01.png)  
+![picture 0](/imgs/2024-10-01-clustering-diagram-01.png)  
 
 **군집 분석*Clustering Analysis***이란 학습 레이블이 없는 데이터를 N개의 클러스터로 묶어내는 기법을 말한다. 분류*Classification*와 유사하지만 분류는 지도학습이고 군집분석은 비지도학습이라는 차이점이 있다. 군집분석은 크게 계층적 군집분석과 비계층적 군집분석으로 나뉜다. 주요 기법으로 k-Mean, DBSCAN 등이 있다. 
 
@@ -79,7 +79,7 @@ plt.show()
 
 **밀도 기반 군집화*Density-based Clustering***은 데이터 포인트의 밀도를 기준으로 군집을 형성하는 방식이다. DBSCAN은 대표적인 밀도 기반 군집화 방법이다. DBSCAN은 데이터 포인트 주변에 주어진 반지름(eps) 내에 최소 데이터 개수(min_samples) 이상이 있으면 군집을 형성한다. DBSCAN은 클러스터의 모양에 구애받지 않으며 이상치를 구분할 수 있는 장점이 있다.
 
-![picture 1](/imgs/3b45f3d6-clustering-diagram-02.png)  
+![picture 1](/imgs/2024-10-01-clustering-diagram-02.png)  
 
 
 ## Hierarchical Clustering
@@ -124,7 +124,7 @@ plt.show()
 
 `scikit-learn`에서는 `AgglomerativeClustering`을 사용해 병합적 계층적 군집을 수행할 수 있다. `n_clusters` 파라미터로 직접 원하는 군집수를 설정할 수 있으며, `n_clusters`를 지정하지 않으면 `distance_threshold`를 사용해 클러스터 수를 결정할 수 있다. 또한 `linkage`를 사용해 병합 방식을 지정할 수 있다. `scipy`에서는 `linkage`와 `dendrogram`을 사용해 덴드로그램을 그릴 수 있다.
 
-![picture 4](/imgs/d712d670-clustering-diagram-03.png)  
+![picture 4](/imgs/2024-10-01-clustering-diagram-03.png)  
 
 ### 4. Divisive Clustering
 
@@ -182,7 +182,7 @@ plt.show()
 ```
 **실루엣 계수*Silhouette Coefficient***는 군집화의 성능을 평가하는 지표로 개별 데이터 포인트의 군집 내 거리와 군집 간 거리를 이용해 계산한다. 실루엣 계수는 -1에서 1 사이의 값을 가지며 1에 가까울수록 근처의 군집과 멀리 떨어져 있음을 나타낸다. 아래와 같이 각 클러스터의 실루엣 계수가 비슷한 경우 군집화가 잘 되었다고 볼 수 있다.
 
-![picture 3](/imgs/2d4df808-clustering-diagram-04.png)  
+![picture 3](/imgs/2024-10-01-clustering-diagram-04.png)  
 
 
 ### Adjusted Rand Index, Mutual Information

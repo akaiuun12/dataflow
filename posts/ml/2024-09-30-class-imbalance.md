@@ -11,9 +11,9 @@ description:
 
 show_thumbnail: true
 image: 
-    /imgs/a8ea5691-class-imbalance-diagram-05.png
+    /imgs/2024-09-30-class-imbalance-diagram-05.png
 optimized_image: 
-    /imgs/a8ea5691-class-imbalance-diagram-05.png
+    /imgs/2024-09-30-class-imbalance-diagram-05.png
                     
 math: true
 published: true
@@ -43,7 +43,7 @@ plt.show()
 
 클래스 불균형*Class Imbalance* 문제는 결과 데이터의 클래스 비중이 맞지 않는 것을 말한다. 머신러닝 모형 학습 시 극단적인 클래스 불균형은 문제가 된다. 예를 들어 **1000개의 환자 데이터 중 음성 데이터가 995개, 양성 데이터가 5개**인 불균형한 데이터가 존재한다고 하자. 이런 극단적인 상황에서는 **주어진 데이터를 모두 A로 판정하는 머신러닝 모형의 정확도가 99.5퍼센트**나 되어버린다. 그러나 정확도가 높다고 모든 환자를 음성으로 판단하는 이런 모형을 사용하지는 않을 것이다.
 
-![picture 5](/imgs/ff08d0fb-class-imbalance-diagram-01.png)  
+![picture 5](/imgs/2024-09-30-class-imbalance-diagram-01.png)  
 
 
 ## Oversampling
@@ -66,7 +66,7 @@ plt.show()
 
 **오버샘플링*Oversampling***은 클래스 불균형 문제를 해결하는 방법 중 하나로 소수 클래스*minority class* 데이터를 늘리는 기법을 말한다. **랜덤오버샘플링*Random Oversampling***은 오버샘플링 중 가장 단순한 방법으로 소수 클래스 데이터를 단순 복제하여 다수 클래스와 같은 사이즈로 만든다. 이러한 방식은 클래스 불균형 문제를 해결하기는 하지만 동일 데이터를 늘리기 때문에 과적합*Overfitting*의 위험이 있다. `imblearn` Python 패키지를 사용하여 오버샘플링을 해볼 수 있다.
 
-![picture 4](/imgs/72fd0117-class-imbalance-diagram-02.png)  
+![picture 4](/imgs/2024-09-30-class-imbalance-diagram-02.png)  
 
 
 ### SMOTE
@@ -88,7 +88,7 @@ plt.show()
 ```
 **SMOTE, *Synthetic Minority Over-sampling Technique***는 Synthetic이라는 단어가 말해주듯 소수 클래스의 새로운 데이터를 만든다. kNN 방식 등을 사용하여 합성 데이터를 만들기 때문에 단순히 데이터를 복제하는 랜덤오버샘플링보다 과적합의 위험이 적다.
 
-![picture 3](/imgs/e39a69b1-class-imbalance-diagram-03.png)  
+![picture 3](/imgs/2024-09-30-class-imbalance-diagram-03.png)  
 
 
 ## Undersampling
@@ -109,7 +109,7 @@ plt.title('Random Undersampling Result')
 plt.show()
 ```
 
-![picture 6](/imgs/d96636b9-class-imbalance-diagram-04.png)  
+![picture 6](/imgs/2024-09-30-class-imbalance-diagram-04.png)  
 
 **언더샘플링*Oversampling***은 오버샘플링과는 반대로 다수 클래스*majority class* 데이터를 줄이는 기법이다.언더샘플링은 클래스 불균형 문제를 해결하기는 하지만 데이터가 줄어들어 모형 학습에 불리하므로 오버샘플링에 비해 그다지 사용되지 않는다.
 
@@ -136,7 +136,7 @@ plt.show()
 
 최근에는 딥러닝 기법의 발전에 힘입어 GAN 등을 사용해 클래스 불균형 문제를 해결하는 시도도 있는데, 합성 데이터의 활용도가 클래스 불균형 문제 해소 외에도 무궁무진하기 때문에 앞으로가 더 기대되는 분야이다.
 
-![picture 8](/imgs/a8ea5691-class-imbalance-diagram-05.png)  
+![picture 8](/imgs/2024-09-30-class-imbalance-diagram-05.png)  
 
 
 ## References
