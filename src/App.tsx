@@ -127,7 +127,62 @@ const App: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  
+
+  const scrollToTop = useCallback(() => {
+    mainContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const handleNavigate = useCallback((newView: ViewState, post: Post | null = null, category: string | null = null, shouldPushState = true) => {
+    setView(newView);
+    setCurrentPost(post);
+    if (category !== null || newView === 'feed') {
+      setSelectedCategory(category);
+    }
+    
+    if (shouldPushState) {
+      let url = '/';
+      if (newView === 'post' && post) {
+        url = `/post/${post.slug}`;
+      } else if (category) {
+        url = `/?category=${category.toLowerCase()}`;
+      }
+      window.history.pushState({ view: newView, postId: post?.id, category }, '', url);
+    }
+    
+    scrollToTop();
+  }, [scrollToTop]);
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      const state = event.state;
+      if (state) {
+        setView(state.view || 'feed');
+        if (state.postId && posts.length > 0) {
+          const post = posts.find(p => p.id === state.postId);
+          setCurrentPost(post || null);
+        } else if (state.view === 'post' && !state.postId) {
+          // If we're on a post view but have no ID in state, try to find by URL
+          const path = window.location.pathname;
+          if (path.startsWith('/post/')) {
+            const slug = path.replace('/post/', '');
+            const post = posts.find(p => p.slug === slug);
+            setCurrentPost(post || null);
+          }
+        } else {
+          setCurrentPost(null);
+        }
+        setSelectedCategory(state.category || null);
+      } else {
+        setView('feed');
+        setCurrentPost(null);
+        setSelectedCategory(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [posts]);
+
   useEffect(() => {
     const loadPosts = async () => {
       try {
@@ -226,6 +281,38 @@ const App: React.FC = () => {
     return Array.from(cats).sort();
   }, [posts]);
 
+  // Handle initial URL navigation
+  useEffect(() => {
+    if (posts.length === 0) return;
+
+    const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get('category');
+
+    if (path.startsWith('/post/')) {
+      const slug = path.replace('/post/', '');
+      const post = posts.find(p => p.slug === slug);
+      if (post) {
+        // Use shouldPushState = false because we are already at this URL
+        handleNavigate('post', post, null, false);
+        window.history.replaceState({ view: 'post', postId: post.id, category: null }, '', path);
+      } else {
+        handleNavigate('feed', null, null, false);
+        window.history.replaceState({ view: 'feed', postId: null, category: null }, '', '/');
+      }
+    } else if (categoryParam) {
+      const cat = categories.find(c => c.toLowerCase() === categoryParam.toLowerCase());
+      if (cat) {
+        handleNavigate('feed', null, cat, false);
+        window.history.replaceState({ view: 'feed', postId: null, category: cat }, '', `/?category=${cat.toLowerCase()}`);
+      }
+    } else {
+      // Set initial state for root path
+      window.history.replaceState({ view: 'feed', postId: null, category: null }, '', '/');
+    }
+    // Only run this once posts are loaded
+  }, [posts.length > 0, handleNavigate, categories]);
+
   // Multi-language search function that handles English and Korean
   const normalizeText = (text: string): string => {
     return text.toLowerCase().trim();
@@ -283,11 +370,6 @@ const App: React.FC = () => {
 
   const featuredPost = useMemo(() => filteredPosts[0] || null, [filteredPosts]);
 
-  const scrollToTop = useCallback(() => {
-    mainContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-
   const borderColor = isDarkMode ? 'border-slate-800' : 'border-slate-200';
 
   return (
@@ -298,7 +380,7 @@ const App: React.FC = () => {
         </div>
         
         <header className={`h-20 flex-shrink-0 ${isDarkMode ? 'bg-slate-900/80' : 'bg-white/80'} backdrop-blur-md border-b ${borderColor} flex items-center justify-between px-4 sm:px-8 z-30`}>
-          <div onClick={() => {setView('feed'); setCurrentPost(null); setSelectedCategory(null); setVisiblePostsCount(6); scrollToTop();}} className="flex items-center space-x-3 cursor-pointer group min-w-fit sm:min-w-[140px]">
+          <div onClick={() => { setVisiblePostsCount(6); handleNavigate('feed', null, null); }} className="flex items-center space-x-3 cursor-pointer group min-w-fit sm:min-w-[140px]">
             <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/20 active:scale-95 transition-all">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
@@ -311,7 +393,7 @@ const App: React.FC = () => {
               {categories.map(cat => (
                 <button 
                   key={cat}
-                  onClick={() => {setSelectedCategory(cat); setView('feed'); setCurrentPost(null); setVisiblePostsCount(6); scrollToTop();}}
+                  onClick={() => { setVisiblePostsCount(6); handleNavigate('feed', null, cat); }}
                   className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm md:text-base lg:text-[18px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${selectedCategory === cat ? 'text-red-600' : 'text-slate-500 hover:text-red-600'}`}
                 >
                   {cat}
@@ -335,7 +417,7 @@ const App: React.FC = () => {
                   <div className="fixed inset-0 z-40" onClick={() => setIsMobileMenuOpen(false)} />
                   <div className={`absolute top-16 left-1/2 -translate-x-1/2 w-48 z-50 rounded-2xl border ${borderColor} ${isDarkMode ? 'bg-slate-900 shadow-slate-950/50' : 'bg-white shadow-slate-200/50'} shadow-2xl p-2 animate-fade-in`}>
                     <button 
-                      onClick={() => {setSelectedCategory(null); setView('feed'); setCurrentPost(null); setIsMobileMenuOpen(false); scrollToTop();}}
+                      onClick={() => { setIsMobileMenuOpen(false); setVisiblePostsCount(6); handleNavigate('feed', null, null); }}
                       className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${!selectedCategory ? 'bg-red-600 text-white' : 'text-slate-500 hover:bg-red-500/5 hover:text-red-500'}`}
                     >
                       ALL POSTS
@@ -343,7 +425,7 @@ const App: React.FC = () => {
                     {categories.map(cat => (
                       <button 
                         key={cat}
-                        onClick={() => {setSelectedCategory(cat); setView('feed'); setCurrentPost(null); setVisiblePostsCount(6); setIsMobileMenuOpen(false); scrollToTop();}}
+                        onClick={() => { setIsMobileMenuOpen(false); setVisiblePostsCount(6); handleNavigate('feed', null, cat); }}
                         className={`w-full text-left px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${selectedCategory === cat ? 'bg-red-600 text-white' : 'text-slate-500 hover:bg-red-500/5 hover:text-red-500'}`}
                       >
                         {cat}
@@ -400,13 +482,13 @@ const App: React.FC = () => {
                         <span className="text-red-600 font-black uppercase text-[9px] sm:text-[10px] md:text-xs tracking-[0.3em] mb-4 block">
                           {selectedCategory ? `${selectedCategory} Recent Post` : 'Recent Post'}
                         </span>
-                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-6 hover:text-red-600 cursor-pointer transition-all leading-tight" onClick={() => {setCurrentPost(featuredPost); setView('post'); scrollToTop();}}>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black tracking-tight mb-6 hover:text-red-600 cursor-pointer transition-all leading-tight" onClick={() => handleNavigate('post', featuredPost)}>
                           {featuredPost.title}
                         </h2>
                         <div className="prose dark:prose-invert max-w-none line-clamp-4 opacity-70 mb-8 font-medium text-base sm:text-lg">
                           {featuredPost.excerpt}
                         </div>
-                        <button onClick={() => {setCurrentPost(featuredPost); setView('post'); scrollToTop();}} className="px-8 sm:px-10 py-3 sm:py-4 bg-red-600 text-white rounded-2xl font-black uppercase text-[10px] sm:text-[11px] md:text-xs tracking-widest hover:bg-red-500 transition-all shadow-xl shadow-red-900/20 active:scale-95">Read More</button>
+                        <button onClick={() => handleNavigate('post', featuredPost)} className="px-8 sm:px-10 py-3 sm:py-4 bg-red-600 text-white rounded-2xl font-black uppercase text-[10px] sm:text-[11px] md:text-xs tracking-widest hover:bg-red-500 transition-all shadow-xl shadow-red-900/20 active:scale-95">Read More</button>
                       </div>
                       <div className="md:w-1/3 flex-shrink-0">
                         <img src={featuredPost.coverImage} className="w-full h-64 object-cover rounded-[2rem] border border-red-500/10 shadow-2xl transition-transform duration-700 group-hover:scale-105" loading="lazy" />
@@ -424,7 +506,7 @@ const App: React.FC = () => {
                   return (
                     <article 
                       key={p.id} 
-                      onClick={() => {setCurrentPost(p); setView('post'); scrollToTop();}} 
+                      onClick={() => handleNavigate('post', p)} 
                       className={`group flex flex-col ${isDarkMode ? 'bg-slate-900/40' : 'bg-white shadow-xl'} border ${borderColor} rounded-[2rem] overflow-hidden hover:border-red-500/30 transition-all duration-500 cursor-pointer h-full ${isFirstPostInGrid && isShowingFeatured ? 'md:hidden' : ''}`}
                     >
                       <div className="aspect-[16/10] relative overflow-hidden"><img src={p.coverImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-80" loading="lazy" /></div>
@@ -554,7 +636,7 @@ const App: React.FC = () => {
                     );
                   })()}
                   <div className="flex justify-center mt-20">
-                    <button onClick={() => {setView('feed'); setCurrentPost(null); scrollToTop();}} className="px-10 sm:px-12 py-4 sm:py-5 bg-black dark:bg-white dark:text-black text-white rounded-3xl font-black uppercase text-[11px] sm:text-[12px] md:text-sm tracking-widest hover:scale-105 transition-all shadow-2xl active:scale-95">Return to Home</button>
+                    <button onClick={() => handleNavigate('feed', null, null)} className="px-10 sm:px-12 py-4 sm:py-5 bg-black dark:bg-white dark:text-black text-white rounded-3xl font-black uppercase text-[11px] sm:text-[12px] md:text-sm tracking-widest hover:scale-105 transition-all shadow-2xl active:scale-95">Return to Home</button>
                   </div>
                 </div>
               </div>
