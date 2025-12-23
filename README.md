@@ -5,7 +5,7 @@ A modern, developer-focused tech blog platform built with React, TypeScript, and
 ## Project Structure
 
 ```
-red-databook/
+databook-red/
 ├── src/
 │   ├── components/       # React components
 │   │   └── MarkdownRenderer.tsx
