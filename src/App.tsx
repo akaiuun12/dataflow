@@ -214,13 +214,12 @@ const App: React.FC = () => {
 
             const finalTags = Array.isArray(metadata.tags) ? metadata.tags.map(String) : (metadata.tags ? [String(metadata.tags)] : []);
 
-            const cleanDescription = metadata.description ? String(metadata.description).trim() : '';
-            const fallbackExcerpt = stripFrontmatter(body).body
-              .slice(0, 180)
+            const excerpt = body
+              .replace(/^#\s+.*$/m, '') // Remove potential H1 title if it's the first line
               .replace(/[#*`]/g, '')
               .replace(/\s+/g, ' ')
-              .trim();
-            const excerpt = (cleanDescription || fallbackExcerpt) ;
+              .trim()
+              .slice(0, 180);
 
             return {
               id: Math.random().toString(36).substr(2, 9),
