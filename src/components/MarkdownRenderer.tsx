@@ -78,18 +78,18 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
               return <code key={`inline-code-${i}-${j}-${k}-${l}`} className="inline-code">{cp.slice(1, -1)}</code>;
             }
 
-            // 5. Split by Bold: **bold**
-            const boldParts = cp.split(/(\*\*[^*]+\*\*)/g);
+            // 5. Split by Bold: **bold** (allowing nested italics and extra stars at end)
+            const boldParts = cp.split(/(\*\*(?:(?!\*\*).)+?\*\*+)/g);
             return boldParts.flatMap((bp, m) => {
               if (bp.startsWith('**') && bp.endsWith('**') && bp.length > 4) {
-                return <strong key={`bold-${i}-${j}-${k}-${l}-${m}`} className="text-red-600 font-bold">{bp.slice(2, -2)}</strong>;
+                return <strong key={`bold-${i}-${j}-${k}-${l}-${m}`} className="text-red-600 font-bold">{renderLineContent(bp.slice(2, -2))}</strong>;
               }
 
               // 6. Split by Italic: *italic*
               const italicParts = bp.split(/(\*[^*]+\*)/g);
               return italicParts.map((ip, n) => {
                 if (ip.startsWith('*') && ip.endsWith('*') && ip.length > 2) {
-                  return <em key={`italic-${i}-${j}-${k}-${l}-${m}-${n}`} className="italic opacity-90">{ip.slice(1, -1)}</em>;
+                  return <em key={`italic-${i}-${j}-${k}-${l}-${m}-${n}`} className="italic opacity-90">{renderLineContent(ip.slice(1, -1))}</em>;
                 }
                 return ip;
               });
@@ -241,6 +241,10 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
 
       const key = `line-${index}`;
       
+      // Match list items with optional indentation
+      const unorderedListMatch = line.match(/^(\s*)([-*])\s+(.*)/);
+      const orderedListMatch = line.match(/^(\s*)(\d+\.)\s+(.*)/);
+
       if (line.startsWith('# ')) {
         const titleText = line.slice(2);
         const isFirstElement = elements.length === 0;
@@ -251,10 +255,32 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
       } else if (line.startsWith('### ')) {
         const titleText = line.slice(4);
         elements.push(<h3 id={slugify(titleText)} key={key} className="text-base sm:text-lg md:text-xl font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h3>);
-      } else if (line.startsWith('- ') || line.startsWith('* ')) {
-        elements.push(<li key={key} className="ml-6 sm:ml-8 mb-1 list-disc pl-3 leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base">{renderLineContent(line.slice(2))}</li>);
-      } else if (line.match(/^\d+\. /)) {
-        elements.push(<li key={key} className="ml-6 sm:ml-8 mb-1 list-decimal pl-3 leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base">{renderLineContent(line.replace(/^\d+\. /, ''))}</li>);
+      } else if (unorderedListMatch) {
+        const indent = unorderedListMatch[1].length;
+        const content = unorderedListMatch[3];
+        const depth = Math.floor(indent / 2); // Assume 2 or 4 spaces per level
+        elements.push(
+          <li 
+            key={key} 
+            className={`mb-1 list-disc leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base pl-3`}
+            style={{ marginLeft: `${(depth + 1) * 1.5}rem` }}
+          >
+            {renderLineContent(content)}
+          </li>
+        );
+      } else if (orderedListMatch) {
+        const indent = orderedListMatch[1].length;
+        const content = orderedListMatch[3];
+        const depth = Math.floor(indent / 2);
+        elements.push(
+          <li 
+            key={key} 
+            className={`mb-1 list-decimal leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base pl-3`}
+            style={{ marginLeft: `${(depth + 1) * 1.5}rem` }}
+          >
+            {renderLineContent(content)}
+          </li>
+        );
       } else if (line.startsWith('> ')) {
         elements.push(<blockquote key={key} className="border-l-4 border-red-600 bg-red-600/5 dark:bg-red-600/10 px-4 sm:px-6 py-3 my-4 italic rounded-r-3xl opacity-80 text-sm sm:text-base md:text-lg">{renderLineContent(line.slice(2))}</blockquote>);
       } else if (trimmedLine === '') {
