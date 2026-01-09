@@ -506,20 +506,22 @@ const App: React.FC = () => {
                     <article 
                       key={p.id} 
                       onClick={() => handleNavigate('post', p)} 
-                      className={`group flex flex-col ${isDarkMode ? 'bg-slate-900/40' : 'bg-white shadow-xl'} border ${borderColor} rounded-[2rem] overflow-hidden hover:border-red-500/30 transition-all duration-500 cursor-pointer h-full ${isFirstPostInGrid && isShowingFeatured ? 'md:hidden' : ''}`}
+                      className={`group flex flex-row md:flex-col ${isDarkMode ? 'bg-slate-900/40' : 'bg-white shadow-xl'} border ${borderColor} rounded-[1.5rem] md:rounded-[2rem] overflow-hidden hover:border-red-500/30 transition-all duration-500 cursor-pointer h-full ${isFirstPostInGrid && isShowingFeatured ? 'md:hidden' : ''}`}
                     >
-                      <div className="aspect-[16/10] relative overflow-hidden"><img src={p.coverImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-80" loading="lazy" /></div>
-                      <div className="p-8 flex flex-col flex-grow">
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-[10px] sm:text-[11px] md:text-sm font-black uppercase tracking-widest text-red-600 bg-red-600/10 px-3 py-1 rounded-lg">{p.category}</span>
-                          <div className="text-[10px] sm:text-[11px] md:text-sm font-black uppercase text-slate-500 tracking-widest flex flex-col items-end opacity-70 group-hover:opacity-100 transition-opacity">
+                      <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-full md:h-auto md:aspect-[16/10] flex-shrink-0 relative overflow-hidden">
+                        <img src={p.coverImage} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-80" loading="lazy" />
+                      </div>
+                      <div className="p-4 sm:p-6 md:p-8 flex flex-col flex-grow min-w-0">
+                        <div className="flex justify-between items-center mb-2 sm:mb-4">
+                          <span className="text-[8px] sm:text-[10px] md:text-sm font-black uppercase tracking-widest text-red-600 bg-red-600/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">{p.category}</span>
+                          <div className="text-[8px] sm:text-[10px] md:text-sm font-black uppercase text-slate-500 tracking-widest flex flex-col items-end opacity-70 group-hover:opacity-100 transition-opacity">
                             <span>{p.publishedAt}</span>
                           </div>
                         </div>
-                        <div className="min-h-0 sm:min-h-[4rem] mb-2 sm:mb-4">
-                          <h3 className="text-lg sm:text-lg md:text-xl font-bold group-hover:text-red-600 transition-colors leading-tight line-clamp-2">{p.title}</h3>
+                        <div className="min-h-0 md:min-h-[4rem] mb-1 sm:mb-2 md:mb-4">
+                          <h3 className="text-sm sm:text-lg md:text-xl font-bold group-hover:text-red-600 transition-colors leading-tight line-clamp-2">{p.title}</h3>
                         </div>
-                        <p className="text-slate-500 dark:text-slate-400 text-base sm:text-lg line-clamp-3 leading-relaxed flex-grow">{p.excerpt}</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-base md:text-lg line-clamp-2 md:line-clamp-3 leading-relaxed flex-grow">{p.excerpt}</p>
                       </div>
                     </article>
                   );
