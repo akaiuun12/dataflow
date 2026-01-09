@@ -25,7 +25,7 @@ Boosting Over Residuals의 논리는 매우 명쾌하다.
 
 이렇게 하면 선형 모델이 큰 틀에서의 경향성을 책임지고, 비선형 모델은 그 세부적인 디테일(잔차)만 보정하는 역할을 수행하게 되어 전체적인 성능이 향상되는 경우가 많다.
 
-![](imgs/2024-07-16-ensemble-comparison.png)
+![단순한 직선 혹은 곡선은 오히려 비선형 모형으로 표현하려면 어려울 수 있다.](imgs/2024-07-16-ensemble-comparison.png)
 
 
 ## Boosting Over Residuals의 구현
@@ -72,7 +72,7 @@ print(f"RMSE: {np.sqrt(mean_squared_error(y_test, final_pred))}")
 ### 주의할 점
 모든 데이터에서 효과적인 것은 아니며 데이터에 선형성이 부족하다면 오히려 불필요한 복잡도만 증가시킬 수 있다. 또한 선형 모형과 비선형 모형을 각각 학습할 때 데이터 누수(Data Leakage)가 발생할 수 있으므로 주의해야 한다.
 
-![현재까지는 Boosting Over Residuals가 내 Submission 중 가장 좋은 성능을 보여줬다.](../../images/986f135ebd0944e30982f54a4683afce1944df7353c8f330110793486a672fdf.png)  
+![현재까지는 Boosting Over Residuals가 내 Submission 중 가장 좋은 성능을 보여줬다.](imgs/2026-01-09-boosting-over-residuals-02.png)  
 
 
 ## References
