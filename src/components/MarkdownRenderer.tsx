@@ -45,8 +45,28 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
     return imgParts.flatMap((part, i) => {
       if (part.startsWith('![') && part.includes('](')) {
         const alt = part.match(/\[([^\]]*)\]/)?.[1] || '';
-        const url = part.match(/\(([^)]+)\)/)?.[1] || '';
-        return <img key={`img-${i}`} src={url} alt={alt} className="rounded-2xl border border-black/5 dark:border-white/5 my-4 mx-auto block max-w-full" />;
+        let url = part.match(/\(([^)]+)\)/)?.[1] || '';
+        
+        // Ensure local image paths are absolute from root
+        if (!url.startsWith('http') && !url.startsWith('/')) {
+          url = '/' + url;
+        }
+        
+        return (
+          <div key={`img-wrapper-${i}`} className="my-8 flex flex-col items-center">
+            <img 
+              src={url} 
+              alt={alt} 
+              className="rounded-2xl border border-black/5 dark:border-white/5 block max-w-full shadow-lg" 
+              loading="lazy"
+            />
+            {alt && (
+              <span className="mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium italic">
+                {alt}
+              </span>
+            )}
+          </div>
+        );
       }
 
       // 2. Split by links: [text](url)
@@ -241,6 +261,12 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
 
       const key = `line-${index}`;
       
+      // Check if line is only an image
+      if (trimmedLine.match(/^!\[[^\]]*\]\([^)]+\)$/)) {
+        elements.push(<div key={key} className="w-full">{renderLineContent(trimmedLine)}</div>);
+        return;
+      }
+
       // Match list items with optional indentation
       const unorderedListMatch = line.match(/^(\s*)([-*])\s+(.*)/);
       const orderedListMatch = line.match(/^(\s*)(\d+\.)\s+(.*)/);
