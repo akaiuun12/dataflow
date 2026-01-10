@@ -4,35 +4,40 @@ export interface TocItem {
   level: number;
 }
 
-const slugify = (text: string): string => {
+export const slugify = (text: string): string => {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^\w\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F-]/g, '')
+    .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
 
 export const extractToc = (markdown: string): TocItem[] => {
   if (!markdown) return [];
   
-  const lines = markdown.split('\n');
+  let lines = markdown.split('\n');
   const toc: TocItem[] = [];
+  const idCounts: Record<string, number> = {};
   
-  // Remove frontmatter if present
-  let startIndex = 0;
-  if (lines[0]?.trim() === '---') {
+  // Remove frontmatter if present (consistent with MarkdownRenderer.tsx)
+  if (lines.length > 0 && lines[0].trim() === '---') {
+    let endIdx = -1;
     for (let i = 1; i < lines.length; i++) {
-      if (lines[i]?.trim() === '---') {
-        startIndex = i + 1;
+      if (lines[i].trim() === '---') {
+        endIdx = i;
         break;
       }
+    }
+    if (endIdx !== -1) {
+      lines = lines.slice(endIdx + 1);
     }
   }
   
   let inCodeBlock = false;
   
-  for (let i = startIndex; i < lines.length; i++) {
+  for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
     
@@ -44,78 +49,27 @@ export const extractToc = (markdown: string): TocItem[] => {
       continue;
     }
     
-    // Skip lines inside code blocks
-    if (inCodeBlock) {
-      continue;
-    }
+    if (inCodeBlock) continue;
     
-    // Match headings: #, ##, ###, etc. (must have space after #)
-    // Use trimmed line to handle indentation
-    const h1Match = trimmedLine.match(/^#\s+(.+)$/);
-    const h2Match = trimmedLine.match(/^##\s+(.+)$/);
-    const h3Match = trimmedLine.match(/^###\s+(.+)$/);
-    const h4Match = trimmedLine.match(/^####\s+(.+)$/);
-    const h5Match = trimmedLine.match(/^#####\s+(.+)$/);
-    const h6Match = trimmedLine.match(/^######\s+(.+)$/);
-    
-    if (h1Match) {
-      const text = h1Match[1].trim();
+    const headerMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/);
+    if (headerMatch) {
+      const level = headerMatch[1].length;
+      const text = headerMatch[2].trim();
       const cleanText = text.replace(/[#*`]/g, '').trim();
+      
       if (cleanText) {
+        let id = slugify(cleanText);
+        if (idCounts[id] !== undefined) {
+          idCounts[id]++;
+          id = `${id}-${idCounts[id]}`;
+        } else {
+          idCounts[id] = 0;
+        }
+
         toc.push({
-          id: slugify(cleanText),
+          id,
           text: cleanText,
-          level: 1,
-        });
-      }
-    } else if (h2Match) {
-      const text = h2Match[1].trim();
-      const cleanText = text.replace(/[#*`]/g, '').trim();
-      if (cleanText) {
-        toc.push({
-          id: slugify(cleanText),
-          text: cleanText,
-          level: 2,
-        });
-      }
-    } else if (h3Match) {
-      const text = h3Match[1].trim();
-      const cleanText = text.replace(/[#*`]/g, '').trim();
-      if (cleanText) {
-        toc.push({
-          id: slugify(cleanText),
-          text: cleanText,
-          level: 3,
-        });
-      }
-    } else if (h4Match) {
-      const text = h4Match[1].trim();
-      const cleanText = text.replace(/[#*`]/g, '').trim();
-      if (cleanText) {
-        toc.push({
-          id: slugify(cleanText),
-          text: cleanText,
-          level: 4,
-        });
-      }
-    } else if (h5Match) {
-      const text = h5Match[1].trim();
-      const cleanText = text.replace(/[#*`]/g, '').trim();
-      if (cleanText) {
-        toc.push({
-          id: slugify(cleanText),
-          text: cleanText,
-          level: 5,
-        });
-      }
-    } else if (h6Match) {
-      const text = h6Match[1].trim();
-      const cleanText = text.replace(/[#*`]/g, '').trim();
-      if (cleanText) {
-        toc.push({
-          id: slugify(cleanText),
-          text: cleanText,
-          level: 6,
+          level,
         });
       }
     }

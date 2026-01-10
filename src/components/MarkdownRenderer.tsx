@@ -8,6 +8,7 @@ import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-sql';
 import 'prismjs/components/prism-bash';
 import katex from 'katex';
+import { slugify } from '../utils/toc';
 
 interface MarkdownRendererProps {
   content: string;
@@ -152,18 +153,10 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
     );
   };
 
-  const slugify = (text: string) => {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
-
   const parseMarkdown = (text: string) => {
     let lines = text.split('\n');
     const elements: React.ReactNode[] = [];
+    const idCounts: Record<string, number> = {};
 
     if (lines.length > 0 && lines[0].trim() === '---') {
       let endIdx = -1;
@@ -270,26 +263,47 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
       // Match list items with optional indentation
       const unorderedListMatch = line.match(/^(\s*)([-*])\s+(.*)/);
       const orderedListMatch = line.match(/^(\s*)(\d+\.)\s+(.*)/);
+      const definitionMatch = line.match(/^(\s*):\s+(.*)/);
 
-      if (line.startsWith('# ')) {
-        const titleText = line.slice(2);
+      const getUniqueId = (title: string) => {
+        let id = slugify(title);
+        if (idCounts[id] !== undefined) {
+          idCounts[id]++;
+          id = `${id}-${idCounts[id]}`;
+        } else {
+          idCounts[id] = 0;
+        }
+        return id;
+      };
+
+      if (trimmedLine.startsWith('# ')) {
+        const titleText = trimmedLine.slice(2);
         const isFirstElement = elements.length === 0;
-        elements.push(<h1 id={slugify(titleText)} key={key} className={`text-2xl sm:text-3xl md:text-4xl font-black ${isFirstElement ? 'mt-4' : 'mt-8'} mb-2 tracking-tighter leading-tight text-current scroll-mt-24`}>{renderLineContent(titleText)}</h1>);
-      } else if (line.startsWith('## ')) {
-        const titleText = line.slice(3);
-        elements.push(<h2 id={slugify(titleText)} key={key} className="text-lg sm:text-xl md:text-2xl font-bold mt-6 mb-2 border-b border-red-500/10 pb-1 tracking-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h2>);
-      } else if (line.startsWith('### ')) {
-        const titleText = line.slice(4);
-        elements.push(<h3 id={slugify(titleText)} key={key} className="text-base sm:text-lg md:text-xl font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h3>);
+        elements.push(<h1 id={getUniqueId(titleText)} key={key} className={`text-2xl sm:text-3xl md:text-4xl font-black ${isFirstElement ? 'mt-4' : 'mt-8'} mb-2 tracking-tighter leading-tight text-current scroll-mt-24`}>{renderLineContent(titleText)}</h1>);
+      } else if (trimmedLine.startsWith('## ')) {
+        const titleText = trimmedLine.slice(3);
+        elements.push(<h2 id={getUniqueId(titleText)} key={key} className="text-lg sm:text-xl md:text-2xl font-bold mt-6 mb-2 border-b border-red-500/10 pb-1 tracking-tight text-current scroll-mt-24">{renderLineContent(titleText)}</h2>);
+      } else if (trimmedLine.startsWith('### ')) {
+        const titleText = trimmedLine.slice(4);
+        elements.push(<h3 id={getUniqueId(titleText)} key={key} className="text-base sm:text-lg md:text-xl font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h3>);
+      } else if (trimmedLine.startsWith('#### ')) {
+        const titleText = trimmedLine.slice(5);
+        elements.push(<h4 id={getUniqueId(titleText)} key={key} className="text-sm sm:text-base md:text-lg font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h4>);
+      } else if (trimmedLine.startsWith('##### ')) {
+        const titleText = trimmedLine.slice(6);
+        elements.push(<h5 id={getUniqueId(titleText)} key={key} className="text-xs sm:text-sm md:text-base font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h5>);
+      } else if (trimmedLine.startsWith('###### ')) {
+        const titleText = trimmedLine.slice(7);
+        elements.push(<h6 id={getUniqueId(titleText)} key={key} className="text-xs sm:text-sm md:text-base font-semibold mt-4 mb-1 text-current scroll-mt-24">{renderLineContent(titleText)}</h6>);
       } else if (unorderedListMatch) {
         const indent = unorderedListMatch[1].length;
         const content = unorderedListMatch[3];
-        const depth = Math.floor(indent / 2); // Assume 2 or 4 spaces per level
+        const depth = Math.floor(indent / 2);
         elements.push(
           <li 
             key={key} 
-            className={`mb-1 list-disc leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base pl-3`}
-            style={{ marginLeft: `${(depth + 1) * 1.5}rem` }}
+            className="mb-1 list-disc leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base ml-4 sm:ml-6 pl-1"
+            style={{ marginLeft: depth > 0 ? `${(depth * 1.5) + (window.innerWidth < 640 ? 1 : 1.5)}rem` : undefined }}
           >
             {renderLineContent(content)}
           </li>
@@ -301,18 +315,25 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
         elements.push(
           <li 
             key={key} 
-            className={`mb-1 list-decimal leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base pl-3`}
-            style={{ marginLeft: `${(depth + 1) * 1.5}rem` }}
+            className="mb-1 list-decimal leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base ml-4 sm:ml-6 pl-1"
+            style={{ marginLeft: depth > 0 ? `${(depth * 1.5) + (window.innerWidth < 640 ? 1 : 1.5)}rem` : undefined }}
           >
             {renderLineContent(content)}
           </li>
+        );
+      } else if (definitionMatch) {
+        const content = definitionMatch[2];
+        elements.push(
+          <p key={key} className="mb-4 leading-relaxed text-sm sm:text-base md:text-[17px] font-normal opacity-90">
+            {renderLineContent(content)}
+          </p>
         );
       } else if (line.startsWith('> ')) {
         elements.push(<blockquote key={key} className="border-l-4 border-red-600 bg-red-600/5 dark:bg-red-600/10 px-4 sm:px-6 py-3 my-4 italic rounded-r-3xl opacity-80 text-sm sm:text-base md:text-lg">{renderLineContent(line.slice(2))}</blockquote>);
       } else if (trimmedLine === '') {
         elements.push(<div key={key} className="h-1" />);
       } else {
-        elements.push(<p key={key} className="mb-1 leading-relaxed text-base sm:text-lg md:text-xl font-medium opacity-90">{renderLineContent(line)}</p>);
+        elements.push(<p key={key} className="mb-4 leading-relaxed text-sm sm:text-base md:text-[17px] font-normal opacity-90">{renderLineContent(line)}</p>);
       }
     });
 
