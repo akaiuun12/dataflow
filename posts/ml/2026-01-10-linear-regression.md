@@ -2,11 +2,9 @@
 title: Linear, Lasso, Ridge Regression
 date: 2026-01-10
 author: Akai Red
-
 image: /imgs/2026-01-10-linear-lasso-ridge-regression-01.png
-tags: ['machine learning', 'regression', 'regularization', 'linear regression', 'ridge', 'lasso']
-
-published: false
+tags: ['regression', 'ridge', 'lasso']
+published: true
 ---
 
 회귀 분석은 데이터를 바탕으로 연속형 타겟을 예측한다. 데이터의 선형성이 강할 경우, 선형 모형에 적합하는 선형 회귀 분석을 수행하게 된다. 본 글에서는 선형 회귀(Linear Regression)와, 과적합을 방지하기 위해 도입된 규제(Regularization) 기법인 릿지(Ridge) 및 라쏘(Lasso) 회귀에 대해 살펴본다.

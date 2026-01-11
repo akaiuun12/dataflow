@@ -302,7 +302,7 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
         elements.push(
           <li 
             key={key} 
-            className="mb-1 list-disc leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base ml-4 sm:ml-6 pl-1"
+            className="my-1 list-disc leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base ml-4 sm:ml-6 pl-1"
             style={{ marginLeft: depth > 0 ? `${(depth * 1.5) + (window.innerWidth < 640 ? 1 : 1.5)}rem` : undefined }}
           >
             {renderLineContent(content)}
@@ -315,7 +315,7 @@ const MarkdownRendererComponent: React.FC<MarkdownRendererProps> = ({ content })
         elements.push(
           <li 
             key={key} 
-            className="mb-1 list-decimal leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base ml-4 sm:ml-6 pl-1"
+            className="my-1 list-decimal leading-relaxed opacity-90 text-sm sm:text-[15px] md:text-base ml-4 sm:ml-6 pl-1"
             style={{ marginLeft: depth > 0 ? `${(depth * 1.5) + (window.innerWidth < 640 ? 1 : 1.5)}rem` : undefined }}
           >
             {renderLineContent(content)}

@@ -1,17 +1,21 @@
 ﻿---
-title: Decision Tree and Ensemble Models
-description: 의사결정나무와 배깅, 부스팅, 랜덤포레스트 등의 앙상블 모형을 알아본다. 분류와 회귀 문제에 대한 성능 비교 포함.
-image: 
-date: 2024-07-16
+title: Decision Tree
+date: 2026-01-11
 author: Akai Red
-category: ML
-tags: ['data science']
-published: true
+image: 
+tags: ['decision tree']
+published: false
 ---
 
 # Classification using DT, Ensemble, RF
 
-의사결정나무*Decision Tree*는 의사결정트리, 결정트리라고도 부르며 분류/회귀 문제에 자주 사용하는 머신러닝 기법이다. 특정 기준을 바탕으로 분할을 반복해서 데이터를 정확하게 분류하는 것을 목표로 한다. 위스콘신 유방암 데이터를 사용해서 의사결정나무 모형을 비교해보자.
+의사결정나무*Decision Tree*는 의사결정트리, 결정트리라고도 부르며 분류/회귀 문제에 자주 사용하는 머신러닝 기법이다. 특정 기준을 바탕으로 분할을 반복해서 데이터를 정확하게 분류하는 것을 목표로 한다.
+
+
+
+
+
+
 
 ```python
 import numpy as np
@@ -75,8 +79,8 @@ $$
 다수결 투표*plurality Voting*는 앙상블 모형에서 최종 예측값을 결정할 때 주로 사용하는 방법이다. 간단하게 가장 많은 예측값(최빈값*mode*)을 대표 예측값으로 사용한다. 보다 복잡한 방법은 분류기별 가중치를 부여한다. 과반수 투표*majority voting*는 예측값 후보가 2개뿐인 다수결 투표의 특수한 경우라고 볼 수 있다.
 
 ### Bagging (Bootstrap Aggregating)
-<!-- ![결정트리, 배깅,부스팅 비교](https://quantdare.com/wp-content/uploads/2016/04/bb3.png) -->
-[What is the difference between Bagging and Boosting?](https://quantdare.com/what-is-the-difference-between-bagging-and-boosting/)
+
+![결정트리, 배깅,부스팅 비교](https://quantdare.com/wp-content/uploads/2016/04/bb3.png)
 
 ```python
 from sklearn.ensemble import BaggingClassifier
