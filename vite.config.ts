@@ -17,6 +17,10 @@ export default defineConfig({
     // This allows the app to use process.env.API_KEY as required by the SDK guidelines
     'process.env.API_KEY': JSON.stringify(process.env.API_KEY || '')
   },
+  server: {
+    host: true, // Listen on all network interfaces
+    port: 5173  // Default Vite port (optional, can be omitted)
+  },
   build: {
     outDir: 'dist',
     sourcemap: true
