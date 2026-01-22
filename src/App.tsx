@@ -3,6 +3,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback, memo } from '
 import { Post, ViewState } from './types';
 import MarkdownRenderer from './components/MarkdownRenderer';
 import { extractToc } from './utils/toc';
+import { SITE_CONFIG } from './config';
 
 const stripFrontmatter = (text: string) => {
   const regex = /^\uFEFF?(?:\s*\r?\n)*---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*(?:[\r\n]+|$)/;
